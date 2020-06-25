@@ -20,85 +20,89 @@ class BackendApiConnectorSpec extends FreeSpec with MustMatchers with WireMockSu
 
   "UnloadingConnectorSpec" - {
 
-    "GET" - {
+    for(endpoint <- endpoints) {
 
-      "should handle client and server errors" in {
-        forAll(responseCodes) {
-          code =>
+      s"GET ${endpoint._1}" - {
+
+        "should handle client and server errors" in {
+          forAll(responseCodes) {
+            code =>
+              server.stubFor(
+                get(endpoint._1)
+                  .willReturn(status(code))
+              )
+
+              connector.get(endpoint._2).futureValue mustBe Nil
+          }
+        }
+
+        "should handle a 200 response" - {
+
+          "containing malformed json" in {
             server.stubFor(
-              get(getUri)
-                .willReturn(status(code))
+              get(endpoint._1)
+                .willReturn(okJson(malFormedJson)))
+
+            connector.get(endpoint._2).futureValue mustBe Nil
+          }
+
+          "containing no records" in {
+            server.stubFor(
+              get(endpoint._1)
+                .willReturn(okJson(Json.arr().toString())))
+
+            connector.get(endpoint._2).futureValue mustBe Nil
+          }
+
+          "containing a single record" in {
+            server.stubFor(
+              get(endpoint._1)
+                .willReturn(okJson(jsonSingle)
+                ))
+
+            val response: List[User] = connector.get(endpoint._2).futureValue
+
+            response.length mustBe 1
+            response.head mustBe User(
+              1,
+              "first name",
+              "last name",
+              "email@test.com",
+              "111.222.333.444",
+              -6.0000000,
+              105.000000
             )
+          }
 
-            connector.getUsersByCity(city).futureValue mustBe Nil
-        }
-      }
+          "containing multiple records" in {
+            server.stubFor(
+              get(endpoint._1)
+                .willReturn(okJson(jsonMultiple)
+                ))
 
-      "should handle a 200 response" - {
+            val response: List[User] = connector.get(endpoint._2).futureValue
 
-        "containing malformed json" in {
-          server.stubFor(
-            get(getUri)
-              .willReturn(okJson(malFormedJson)))
+            response.length mustBe 2
+            response.head mustBe User(
+              1,
+              "first name",
+              "last name",
+              "email@test.com",
+              "111.222.333.444",
+              -6.0000000,
+              105.000000
+            )
+            response(1) mustBe User(
+              2,
+              "first name",
+              "last name",
+              "email@test.com",
+              "111.222.333.444",
+              -6.0000000,
+              105.000000
+            )
+          }
 
-          connector.getUsersByCity(city).futureValue mustBe Nil
-        }
-
-        "containing no records" in {
-          server.stubFor(
-            get(getUri)
-              .willReturn(okJson(Json.arr().toString())))
-
-          connector.getUsersByCity(city).futureValue mustBe Nil
-        }
-
-        "containing a single record" in {
-          server.stubFor(
-            get(getUri)
-              .willReturn(okJson(jsonSingle)
-              ))
-
-          val response: List[User] = connector.getUsersByCity(city).futureValue
-
-          response.length mustBe 1
-          response.head mustBe User(
-            1,
-            "first name",
-            "last name",
-            "email@test.com",
-            "111.222.333.444",
-            -6.0000000,
-            105.000000
-          )
-        }
-
-        "containing multiple records" in {
-          server.stubFor(
-            get(getUri)
-              .willReturn(okJson(jsonMultiple)
-              ))
-
-          val response: List[User] = connector.getUsersByCity(city).futureValue
-
-          response.length mustBe 2
-          response.head mustBe User(
-            1,
-            "first name",
-            "last name",
-            "email@test.com",
-            "111.222.333.444",
-            -6.0000000,
-            105.000000
-          )
-          response(1) mustBe User(
-            2,
-            "first name",
-            "last name",
-            "email@test.com",
-            "111.222.333.444",
-            -6.0000000,
-            105.000000
-          )
         }
 
       }
@@ -106,11 +110,19 @@ class BackendApiConnectorSpec extends FreeSpec with MustMatchers with WireMockSu
     }
 
   }
+
 }
 
 object BackendApiConnectorSpec {
-  private val getUri = s"/city/London/users/"
-  private val city = "London"
+  private val getByCityUri = s"/city/London/users/"
+  private val getUsersUri = s"/users/"
+  private val city = Some("London")
+  private val noCity = None
+
+  private val endpoints: Map[String, Option[String]] = Map(
+    getByCityUri -> city,
+    getUsersUri -> noCity
+  )
 
   private val user1 = Json.obj(
     "id" -> 1,

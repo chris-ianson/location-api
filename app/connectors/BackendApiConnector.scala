@@ -10,9 +10,9 @@ import scala.concurrent.Future
 
 class BackendApiConnector @Inject()(config: FrontendAppConfig, ws: WSClient) {
 
-  def getUsersByCity(city: String): Future[List[User]] = {
+  def get(city: Option[String]): Future[List[User]] = {
 
-    val url = s"${config.arrivalsBackend}/city/$city/users/"
+    val url = s"${config.arrivalsBackend}${buildUri(city)}"
 
     ws.url(url).get.map {
       response => response.json.as[List[User]]
@@ -20,6 +20,11 @@ class BackendApiConnector @Inject()(config: FrontendAppConfig, ws: WSClient) {
       case _ => Nil
     }
 
+  }
+
+  private def buildUri(city: Option[String]) = city match {
+    case Some(value) if value.nonEmpty => s"/city/$value/users/"
+    case _ => s"/users/"
   }
 
 }
