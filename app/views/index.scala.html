@@ -1,5 +1,18 @@
-@()
+@(users: List[User], allUsersFiltered: List[User])
 
-@main("Welcome to Play") {
-  <h1>Welcome to Play!</h1>
+@main("API Location App") {
+  <h1>API Location App</h1>
 }
+
+<h2>Users living in London</h2>
+
+@for(user <- users) {
+  <div></div><p>#@{user.id} @{user.firstName} @{user.lastName}</p></div>
+}
+
+<h2>Users currently within 50 miles of London</h2>
+
+@for(user <- allUsersFiltered) {
+  <div></div><p>#@{user.id} @{user.firstName} @{user.lastName}</p></div>
+}
+

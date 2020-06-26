@@ -114,8 +114,8 @@ class BackendApiConnectorSpec extends FreeSpec with MustMatchers with WireMockSu
 }
 
 object BackendApiConnectorSpec {
-  private val getByCityUri = s"/city/London/users/"
-  private val getUsersUri = s"/users/"
+  private val getByCityUri = s"/city/London/users"
+  private val getUsersUri = s"/users"
   private val city = Some("London")
   private val noCity = None
 
