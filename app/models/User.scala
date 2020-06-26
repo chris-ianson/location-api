@@ -1,7 +1,9 @@
 package models
 
 import play.api.libs.functional.syntax._
-import play.api.libs.json.{JsPath, Reads}
+import play.api.libs.json._
+
+import scala.util.{Success, Try}
 
 case class User(
                  id: Int,
@@ -10,10 +12,18 @@ case class User(
                  email: String,
                  ipAddress: String,
                  latitude: Double,
-                 longitude: Double
-               )
+                 longitude: Double)
 
 object User {
+
+  //TODO: Update test for lat and long that are strings
+  private val readDoubleFromString: Reads[Double] = implicitly[Reads[String]]
+    .map(x => Try(x.toDouble))
+    .collect (JsonValidationError(Seq("Parsing error"))){
+      case Success(a) => a
+    }
+
+  private val readDouble: Reads[Double] = implicitly[Reads[Double]].orElse(readDoubleFromString)
 
   implicit val reads: Reads[User] = (
     (JsPath \ "id").read[Int] and
@@ -21,7 +31,8 @@ object User {
       (JsPath \ "last_name").read[String] and
       (JsPath \ "email").read[String] and
       (JsPath \ "ip_address").read[String] and
-      (JsPath \ "latitude").read[Double] and
-      (JsPath \ "longitude").read[Double]
+      (__ \ "latitude").read[Double](readDouble) and
+      (__ \ "longitude").read[Double](readDouble)
     ) (User.apply _)
+
 }
