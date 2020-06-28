@@ -30,6 +30,26 @@ class UserSpec extends FreeSpec with MustMatchers with Generators with ScalaChec
 
     }
 
+    "serialise from json when latitude and longitude are strings" in {
+
+      forAll(arbitrary[User]) {
+        user =>
+
+          val record = Json.obj(
+            "id" ->  user.id,
+            "first_name" ->  user.firstName,
+            "last_name" ->  user.lastName,
+            "email" ->  user.email,
+            "ip_address" ->  user.ipAddress,
+            "latitude" ->  s"${user.latitude}",
+            "longitude" ->  s"${user.longitude}",
+          )
+
+          record.as[User] mustBe user
+      }
+
+    }
+
   }
 
 }

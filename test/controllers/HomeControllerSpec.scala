@@ -47,12 +47,6 @@ class HomeControllerSpec extends PlaySpec with GuiceOneAppPerTest with Injecting
       contentAsString(home) must include ("Users currently within 50 miles of London")
     }
 
-    "render the index page from the application" in {
-      val controller = inject[HomeController]
-      val home = controller.index().apply(FakeRequest(GET, "/"))
-      status(home) mustBe OK
-    }
-
     "render the index page from the router" in {
       val request = FakeRequest(GET, "/")
       val home = route(app, request).get

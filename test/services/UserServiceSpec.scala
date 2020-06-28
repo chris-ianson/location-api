@@ -25,7 +25,7 @@ class UserServiceSpec extends FreeSpec with MustMatchers with Generators with Sc
 
   "UserServiceSpec" - {
 
-    "getUsers" - {
+    "`getUsers` method" - {
 
       "must return users" in {
 
@@ -42,7 +42,7 @@ class UserServiceSpec extends FreeSpec with MustMatchers with Generators with Sc
 
     }
 
-    "getUsersByDistance" - {
+    "`getUsersByDistance` method" - {
 
       "must return users when 50 miles of London" in {
 
