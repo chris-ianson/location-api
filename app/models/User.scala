@@ -31,8 +31,18 @@ object User {
       (JsPath \ "last_name").read[String] and
       (JsPath \ "email").read[String] and
       (JsPath \ "ip_address").read[String] and
-      (__ \ "latitude").read[Double](readDouble) and
-      (__ \ "longitude").read[Double](readDouble)
+      (JsPath \ "latitude").read[Double](readDouble) and
+      (JsPath \ "longitude").read[Double](readDouble)
     ) (User.apply _)
+
+  implicit val writes: Writes[User] = (
+    (JsPath \ "id").write[Int] and
+      (JsPath \ "first_name").write[String] and
+      (JsPath \ "last_name").write[String] and
+      (JsPath \ "email").write[String] and
+      (JsPath \ "ip_address").write[String] and
+      (JsPath \ "latitude").write[Double] and
+      (JsPath \ "longitude").write[Double]
+    ) (unlift(User.unapply))
 
 }
